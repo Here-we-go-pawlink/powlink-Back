@@ -1,0 +1,17 @@
+jwt:
+  secret: ${JWT_SECRET:CHANGE_ME_TO_256BIT_SECRET_CHANGE_ME_TO_256BIT_SECRET}
+  access-exp-seconds: 900      # 15분
+  refresh-exp-seconds: 1209600   # 14일
+
+logging:
+  level:
+    hwan.project2.security.jwt: DEBUG
+
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+    jpa:
+      hibernate:
+        ddl-auto: create-drop
