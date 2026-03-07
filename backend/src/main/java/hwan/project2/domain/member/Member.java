@@ -7,6 +7,7 @@ import lombok.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(name = "members")
 public class Member extends BaseTimeEntity {
 
     @Id
@@ -17,31 +18,27 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private String name;
 
-    // name#tag
+    // 예: hwan#1234 같은 최종 표시값으로 쓸 거면 정책 다시 정해야 함
     @Column(nullable = false, unique = true, length = 120)
     private String tag;
 
-    // 로그인 식별자
+    // 대표 이메일 느낌. 소셜에서도 쓸 수 있음
     @Column(nullable = false, unique = true, length = 120)
     private String email;
 
-    // bcrypt 해시 저장
-    @Column(nullable = false, length = 200)
+    // 로컬 회원만 값이 있고, 소셜 회원은 null 가능
+    @Column(length = 200)
     private String password;
-
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private MemberStatus status;
 
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
-    private Role role; // USER or ADMIN
+    private Role role;
 
-
-    // ===== 생성 메서드 =====
-    public static Member create(String name, String tag, String email, String encodedPassword) {
+    public static Member createLocal(String name, String tag, String email, String encodedPassword) {
         Member member = new Member();
         member.name = name;
         member.tag = tag;
@@ -52,7 +49,17 @@ public class Member extends BaseTimeEntity {
         return member;
     }
 
-    // ===== 도메인 메서드 =====
+    public static Member createSocial(String name, String tag, String email) {
+        Member member = new Member();
+        member.name = name;
+        member.tag = tag;
+        member.email = email;
+        member.password = null;
+        member.status = MemberStatus.ACTIVE;
+        member.role = Role.ROLE_USER;
+        return member;
+    }
+
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
     }
@@ -80,5 +87,9 @@ public class Member extends BaseTimeEntity {
 
     public boolean isActive() {
         return this.status == MemberStatus.ACTIVE;
+    }
+
+    public boolean hasPassword() {
+        return this.password != null && !this.password.isBlank();
     }
 }
