@@ -4,10 +4,12 @@ import hwan.project2.exception.ErrorResponse;
 import hwan.project2.security.CustomUserDetailsService;
 import hwan.project2.security.jwt.JwtAuthenticationFilter;
 import hwan.project2.security.jwt.JwtTokenProvider;
+import hwan.project2.security.oauth.CustomOAuth2UserService;
+import hwan.project2.security.oauth.OAuth2LoginFailureHandler;
+import hwan.project2.security.oauth.OAuth2LoginSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,6 +37,9 @@ public class SecurityConfig {
             HttpSecurity http,
             JwtTokenProvider jwtTokenProvider,
             CustomUserDetailsService customUserDetailsService,
+            CustomOAuth2UserService customOAuth2UserService,
+            OAuth2LoginSuccessHandler oauth2LoginSuccessHandler,
+            OAuth2LoginFailureHandler oauth2LoginFailureHandler,
             ObjectMapper objectMapper,
             org.springframework.data.redis.core.StringRedisTemplate redis
     ) throws Exception {
@@ -52,7 +57,11 @@ public class SecurityConfig {
                 .anyRequest().permitAll()
         );
 
-        http.oauth2Login(Customizer.withDefaults());
+        http.oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                .successHandler(oauth2LoginSuccessHandler)
+                .failureHandler(oauth2LoginFailureHandler)
+        );
 
         http.addFilterBefore(
                 new JwtAuthenticationFilter(jwtTokenProvider, customUserDetailsService, redis),

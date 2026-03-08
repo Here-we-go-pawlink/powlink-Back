@@ -6,11 +6,15 @@ import hwan.project2.exception.auth.MemberAlreadyExistsException;
 import hwan.project2.exception.auth.MemberNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.RedisSystemException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,7 +23,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // ✅ 401 통일
     @ExceptionHandler({
             InvalidRefreshTokenException.class,
             MemberNotFoundException.class,
@@ -36,7 +39,6 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of("CONFLICT", e.getMessage()));
     }
 
-    // ✅ Validation: @Valid @RequestBody
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> badRequest(MethodArgumentNotValidException e) {
         Map<String, String> errors = new LinkedHashMap<>();
@@ -47,14 +49,23 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("BAD_REQUEST", "Validation failed", errors));
     }
 
-    // ✅ Validation: @RequestParam / @PathVariable
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> badRequest(ConstraintViolationException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponse.of("BAD_REQUEST", "Validation failed"));
     }
 
-    // ✅ Catch-all: 500
+    @ExceptionHandler({
+            RedisConnectionFailureException.class,
+            RedisSystemException.class,
+            DataAccessResourceFailureException.class
+    })
+    public ResponseEntity<ErrorResponse> redisUnavailable(RuntimeException e) {
+        log.warn("Redis unavailable: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ErrorResponse.of("REDIS_UNAVAILABLE", "Temporary server issue. Please retry later."));
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> serverError(RuntimeException e) {
         log.error("Internal Server Error: ", e);
