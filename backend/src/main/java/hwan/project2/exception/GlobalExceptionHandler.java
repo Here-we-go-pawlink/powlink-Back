@@ -4,6 +4,7 @@ import hwan.project2.exception.auth.InvalidCredentialsException;
 import hwan.project2.exception.auth.InvalidRefreshTokenException;
 import hwan.project2.exception.auth.MemberAlreadyExistsException;
 import hwan.project2.exception.auth.MemberNotFoundException;
+import hwan.project2.exception.diary.DiaryNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -31,6 +32,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> unauthorized(RuntimeException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse.of("UNAUTHORIZED", "Unauthorized"));
+    }
+
+    @ExceptionHandler(DiaryNotFoundException.class)
+    public ResponseEntity<ErrorResponse> diaryNotFound(DiaryNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponse.of("NOT_FOUND", e.getMessage()));
     }
 
     @ExceptionHandler(MemberAlreadyExistsException.class)
