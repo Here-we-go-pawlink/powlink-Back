@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot - Local Dev (Debug)",
+      "request": "launch",
+      "mainClass": "hwan.project2.Project2Application",
+      "projectName": "backend",
+      "cwd": "${workspaceFolder}/backend",
+      "envFile": "${workspaceFolder}/.env",
+      "args": "",
+      "vmArgs": "-Dspring.profiles.active=local"
+    }
+  ]
+}
