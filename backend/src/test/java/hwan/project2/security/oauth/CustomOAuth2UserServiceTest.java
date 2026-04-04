@@ -36,7 +36,7 @@ class CustomOAuth2UserServiceTest {
     @Test
     @DisplayName("소셜 로그인 시 같은 이메일 로컬 계정이 있어도 자동 병합하지 않고 신규 회원을 만든다")
     void socialLogin_shouldNotMergeByEmail() {
-        Member local = Member.createLocal("localUser", "LOCAL1", "same@test.com", passwordEncoder.encode("password123"));
+        Member local = Member.createLocal("localUser", "LOCAL1", "same@test.com", passwordEncoder.encode("password123"), null);
         memberRepository.save(local);
         long beforeMemberCount = memberRepository.count();
 
@@ -94,5 +94,43 @@ class CustomOAuth2UserServiceTest {
 
         Member saved = memberRepository.findById(principal.getId()).orElseThrow();
         assertTrue(saved.getName().length() <= 20);
+    }
+    @Test
+    @DisplayName("네이버 응답 response 필드에서 사용자 정보를 파싱한다")
+    void socialLogin_shouldParseNaverResponseAttributes() {
+        OAuth2MemberPrincipal principal = customOAuth2UserService.loadOrCreateMemberFromAttributes(
+                "naver",
+                Map.of(
+                        "response",
+                        Map.of(
+                                "id", "naver-user-001",
+                                "email", "naver@test.com",
+                                "name", "Naver User"
+                        )
+                )
+        );
+
+        Member saved = memberRepository.findById(principal.getId()).orElseThrow();
+        assertEquals("Naver User", saved.getName());
+        assertEquals(1, socialAccountRepository.count());
+    }
+
+    @Test
+    @DisplayName("네이버 이름이 없으면 nickname을 표시명으로 사용한다")
+    void socialLogin_shouldUseNaverNicknameWhenNameMissing() {
+        OAuth2MemberPrincipal principal = customOAuth2UserService.loadOrCreateMemberFromAttributes(
+                "naver",
+                Map.of(
+                        "response",
+                        Map.of(
+                                "id", "naver-user-002",
+                                "email", "naver2@test.com",
+                                "nickname", "Naver Nick"
+                        )
+                )
+        );
+
+        Member saved = memberRepository.findById(principal.getId()).orElseThrow();
+        assertEquals("Naver Nick", saved.getName());
     }
 }

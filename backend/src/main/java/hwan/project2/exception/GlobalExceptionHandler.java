@@ -5,6 +5,7 @@ import hwan.project2.exception.auth.InvalidRefreshTokenException;
 import hwan.project2.exception.auth.MemberAlreadyExistsException;
 import hwan.project2.exception.auth.MemberNotFoundException;
 import hwan.project2.exception.diary.DiaryNotFoundException;
+import hwan.project2.exception.image.ImageUploadException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -38,6 +39,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> diaryNotFound(DiaryNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ErrorResponse.of("NOT_FOUND", e.getMessage()));
+    }
+
+    @ExceptionHandler(ImageUploadException.class)
+    public ResponseEntity<ErrorResponse> imageUploadFailed(ImageUploadException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of("IMAGE_UPLOAD_FAILED", e.getMessage()));
     }
 
     @ExceptionHandler(MemberAlreadyExistsException.class)

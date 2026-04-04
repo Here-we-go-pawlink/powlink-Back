@@ -33,6 +33,9 @@ public class DiaryService {
                 .orElseThrow(MemberNotFoundException::new);
         Diary diary = Diary.create(member, req.title(), req.content(),
                 req.diaryDate(), req.weather(), req.isSecret());
+        if (req.imageUrls() != null && !req.imageUrls().isEmpty()) {
+            diary.addImages(req.imageUrls());
+        }
         return diaryRepository.save(diary).getId();
     }
 
@@ -58,6 +61,7 @@ public class DiaryService {
         Diary diary = diaryRepository.findByIdWithEmotions(diaryId, memberId)
                 .orElseThrow(DiaryNotFoundException::new);
         diary.update(req.title(), req.content(), req.weather(), req.isSecret());
+        diary.updateImages(req.imageUrls() != null ? req.imageUrls() : List.of());
     }
 
     @Transactional

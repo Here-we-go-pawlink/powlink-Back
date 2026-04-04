@@ -52,7 +52,7 @@ public class AuthService {
 
         try {
             String tag = tagGenerator.generateUniqueTag();
-            Member member = Member.createLocal(req.name(), tag, req.email(), passwordEncoder.encode(req.password()));
+            Member member = Member.createLocal(req.name(), tag, req.email(), passwordEncoder.encode(req.password()), req.profileImageUrl());
 
             Member saved = memberRepository.save(member);
             log.info("signup ok. name={}, email={}, tag={}", saved.getName(), saved.getEmail(), saved.getTag());

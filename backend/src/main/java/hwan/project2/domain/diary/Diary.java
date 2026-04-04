@@ -52,6 +52,12 @@ public class Diary {
     @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DiaryKeyword> keywords = new ArrayList<>();
 
+    // 이미지 리스트 (1:N)
+    @BatchSize(size = 30)
+    @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("imageOrder ASC")
+    private List<DiaryImage> images = new ArrayList<>();
+
     public static Diary create(Member member, String title, String content,
                                LocalDate diaryDate, Weather weather, boolean isSecret) {
         Diary diary = new Diary();
@@ -70,6 +76,17 @@ public class Diary {
         this.content = content;
         this.weather = weather;
         this.isSecret = isSecret;
+    }
+
+    public void addImages(List<String> imageUrls) {
+        for (int i = 0; i < imageUrls.size(); i++) {
+            this.images.add(DiaryImage.of(this, imageUrls.get(i), i));
+        }
+    }
+
+    public void updateImages(List<String> imageUrls) {
+        this.images.clear();
+        addImages(imageUrls);
     }
 
     @PrePersist

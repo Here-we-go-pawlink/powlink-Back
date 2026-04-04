@@ -30,6 +30,9 @@ public class Member extends BaseTimeEntity {
     @Column(length = 200)
     private String password;
 
+    @Column(length = 500)
+    private String profileImageUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private MemberStatus status;
@@ -38,26 +41,32 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false, length = 30)
     private Role role;
 
-    public static Member createLocal(String name, String tag, String email, String encodedPassword) {
+    public static Member createLocal(String name, String tag, String email, String encodedPassword, String profileImageUrl) {
         Member member = new Member();
         member.name = name;
         member.tag = tag;
         member.email = email;
         member.password = encodedPassword;
+        member.profileImageUrl = profileImageUrl;
         member.status = MemberStatus.ACTIVE;
         member.role = Role.ROLE_USER;
         return member;
     }
 
-    public static Member createSocial(String name, String tag, String email) {
+    public static Member createSocial(String name, String tag, String email, String profileImageUrl) {
         Member member = new Member();
         member.name = name;
         member.tag = tag;
         member.email = email;
         member.password = null;
+        member.profileImageUrl = profileImageUrl;
         member.status = MemberStatus.ACTIVE;
         member.role = Role.ROLE_USER;
         return member;
+    }
+
+    public void updateProfileImage(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 
     public void changePassword(String encodedPassword) {

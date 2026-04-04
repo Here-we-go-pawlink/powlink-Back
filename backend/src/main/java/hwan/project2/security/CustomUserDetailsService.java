@@ -45,7 +45,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 member.getTag(),
                 member.getPassword(),
                 member.getRole(),
-                List.of(new SimpleGrantedAuthority(member.getRole().name()))
+                List.of(new SimpleGrantedAuthority(member.getRole().name())),
+                member.getProfileImageUrl()
         );
     }
 

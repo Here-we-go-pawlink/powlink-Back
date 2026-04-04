@@ -3,6 +3,9 @@ jwt:
   access-exp-seconds: 900        # 15분
   refresh-exp-seconds: 1209600   # 14일
 
+image:
+  upload-dir: ${user.home}/here-we-go/images  # S3 전환 시 이 설정 제거
+
 logging:
   level:
     hwan.project2.security.jwt: DEBUG

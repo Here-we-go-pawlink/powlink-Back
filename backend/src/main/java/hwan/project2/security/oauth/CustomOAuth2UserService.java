@@ -83,7 +83,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         // No auto-merge by email: use provider+id based deterministic internal email.
         String internalEmail = buildInternalSocialEmail(profile.provider(), profile.providerUserId());
-        Member member = Member.createSocial(displayName, tag, internalEmail);
+        Member member = Member.createSocial(displayName, tag, internalEmail, null);
         Member savedMember = memberRepository.save(member);
 
         SocialAccount socialAccount = SocialAccount.create(

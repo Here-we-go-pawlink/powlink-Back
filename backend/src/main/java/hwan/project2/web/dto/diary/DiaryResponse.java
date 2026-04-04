@@ -16,7 +16,8 @@ public record DiaryResponse(
         String status,
         LocalDateTime createdAt,
         List<EmotionResponse> emotions,
-        List<String> keywords
+        List<String> keywords,
+        List<String> imageUrls
 ) {
     public static DiaryResponse from(Diary diary) {
         return new DiaryResponse(
@@ -33,6 +34,9 @@ public record DiaryResponse(
                         .toList(),
                 diary.getKeywords().stream()
                         .map(k -> k.getWord())
+                        .toList(),
+                diary.getImages().stream()
+                        .map(img -> img.getImageUrl())
                         .toList()
         );
     }

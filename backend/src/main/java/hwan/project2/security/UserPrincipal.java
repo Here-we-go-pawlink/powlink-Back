@@ -19,6 +19,7 @@ public class UserPrincipal implements UserDetails {
     private final String password;         // 해시
     private final Role role;
     private final Collection<? extends GrantedAuthority> authorities;
+    private final String profileImageUrl;
 
     public String getDisplayName() {
         return name + "#" + tag;

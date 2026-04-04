@@ -57,7 +57,8 @@ public class AuthController {
                 principal.getId(),
                 principal.getEmail(),
                 principal.getDisplayName(),
-                principal.getRole().name()
+                principal.getRole().name(),
+                principal.getProfileImageUrl()
         );
     }
 

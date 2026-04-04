@@ -42,7 +42,7 @@ class TagTest {
 
     @Test
     void 회원가입_태그를이용해서() {
-        Long id = authService.signup(new SignupRequest("hwan", "hwan@test.com", "pw1234"));
+        Long id = authService.signup(new SignupRequest("hwan", "hwan@test.com", "pw1234", null));
 
         Member member = memberRepository.findById(id).orElseThrow();
         assertEquals("hwan", member.getName());

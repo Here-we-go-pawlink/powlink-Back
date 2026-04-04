@@ -41,7 +41,7 @@ class AuthServiceRefreshTest {
     @DisplayName("비활성화된 회원은 리프레시 토큰으로 갱신할 수 없다")
     void refresh_shouldThrowException_whenMemberIsInactive() {
         // given: 회원 가입 및 정지 처리
-        Long memberId = authService.signup(new SignupRequest("tester", "tester@test.com", "password"));
+        Long memberId = authService.signup(new SignupRequest("tester", "tester@test.com", "password", null));
         Member member = memberRepository.findById(memberId).orElseThrow();
         member.suspend(); // 비활성화
         memberRepository.saveAndFlush(member);

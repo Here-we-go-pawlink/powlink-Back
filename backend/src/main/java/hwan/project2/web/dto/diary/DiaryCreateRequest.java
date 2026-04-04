@@ -6,11 +6,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record DiaryCreateRequest(
         @NotBlank @Size(max = 100) String title,
         @NotBlank String content,
         @NotNull LocalDate diaryDate,
         Weather weather,
-        boolean isSecret
+        boolean isSecret,
+        List<String> imageUrls
 ) {}
