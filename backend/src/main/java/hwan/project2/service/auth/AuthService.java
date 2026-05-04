@@ -135,10 +135,13 @@ public class AuthService {
     }
 
     @Transactional
-    public void updateProfile(Long memberId, String name) {
+    public void updateProfile(Long memberId, String name, String profileImageUrl) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
         member.updateName(name);
+        if (profileImageUrl != null) {
+            member.updateProfileImage(profileImageUrl);
+        }
     }
 
     private String refreshKey(Long memberId) {

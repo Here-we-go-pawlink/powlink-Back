@@ -22,7 +22,12 @@
       "Bash(xargs cat:*)",
       "Bash(lsof -ti:8080)",
       "Bash(xargs kill:*)",
-      "Bash(pkill -f \"bootRun\\\\|Project2Application\\\\|gradlew\")"
+      "Bash(pkill -f \"bootRun\\\\|Project2Application\\\\|gradlew\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ghks3\\\\IdeaProjects\\\\Here_we_go\\\\backend\\\\src\\\\main\\\\java\\\\hwan\\\\project2\" -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(Head -50)",
+      "Bash(xargs grep *)",
+      "Bash(Get-ChildItem *)"
     ]
   }
 }

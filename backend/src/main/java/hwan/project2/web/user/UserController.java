@@ -23,7 +23,7 @@ public class UserController {
     public ResponseEntity<Void> updateProfile(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody UpdateProfileRequest req) {
-        authService.updateProfile(principal.getId(), req.name());
+        authService.updateProfile(principal.getId(), req.name(), req.profileImageUrl());
         return ResponseEntity.ok().build();
     }
 }
