@@ -15,6 +15,13 @@ const menuItems = [
   { label: '설정',       icon: '⚙️', route: '/settings'  },
 ];
 
+const DEFAULT_PROFILE_IMAGE = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+const resolveImageUrl = (url) => {
+  if (!url) return DEFAULT_PROFILE_IMAGE;
+  if (url.startsWith('http')) return url;
+  return `${import.meta.env.VITE_API_BASE_URL}${url}`;
+};
+
 const SidebarLeft = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -45,7 +52,7 @@ const SidebarLeft = () => {
         <div className="profile-img-wrap">
           <img
             className="profile-img"
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+            src={resolveImageUrl(user?.profileImageUrl)}
             alt="profile"
           />
         </div>

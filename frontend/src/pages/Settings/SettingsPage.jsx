@@ -1,8 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import SidebarLeft from '../../components/Sidebar-left/SidebarLeft';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { logout } from '@/services/userApi';
+import { useUserContext } from '@/contexts/UserContext';
+import { logout, updateProfile, uploadProfileImage } from '@/services/userApi';
 import '@/styles/Settings/SettingsPage.css';
+
+const DEFAULT_PROFILE_IMAGE = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+const resolveImageUrl = (url) => {
+  if (!url) return DEFAULT_PROFILE_IMAGE;
+  if (url.startsWith('http')) return url;
+  return `${import.meta.env.VITE_API_BASE_URL}${url}`;
+};
 
 /* ── 기본값 ───────────────────────────────────────────── */
 const DEFAULT_SETTINGS = {
@@ -75,7 +83,7 @@ const ToggleRow = ({ label, desc, checked, onChange }) => (
 );
 
 /* ── 오른쪽 패널 ────────────────────────────────────── */
-const RightPanel = ({ settings }) => {
+const RightPanel = ({ settings, profileImageUrl }) => {
   const { profile, notifications, writing, ai } = settings;
   const notifOn = Object.values(notifications).some(Boolean);
   const aiOn    = Object.values(ai).some(Boolean);
@@ -87,7 +95,7 @@ const RightPanel = ({ settings }) => {
         <div className="rp-card-label">프로필 미리보기</div>
         <div className="rp-avatar">
           <img
-            src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+            src={resolveImageUrl(profileImageUrl)}
             alt="profile"
           />
         </div>
@@ -150,9 +158,13 @@ const RightPanel = ({ settings }) => {
 ═══════════════════════════════════════════════════════ */
 const SettingsPage = () => {
   const user = useCurrentUser();
+  const { setUser } = useUserContext();
+  const fileInputRef = useRef(null);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [profileDraft, setProfileDraft] = useState({ ...DEFAULT_SETTINGS.profile });
-  const [toast, setToast] = useState(null); // { msg, type }
+  const [profileImageUrl, setProfileImageUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -163,6 +175,7 @@ const SettingsPage = () => {
     };
     setSettings(prev => ({ ...prev, profile }));
     setProfileDraft(profile);
+    setProfileImageUrl(user.profileImageUrl ?? '');
   }, [user]);
 
   const showToast = (msg, type = 'success') => {
@@ -177,16 +190,44 @@ const SettingsPage = () => {
       [section]: { ...prev[section], [key]: value },
     }));
 
+  /* 사진 변경 */
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadProfileImage(file);
+      setProfileImageUrl(url);
+      showToast('사진이 업로드되었습니다. 저장 버튼을 눌러 적용하세요.', 'info');
+    } catch {
+      showToast('사진 업로드에 실패했습니다.', 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   /* 프로필 저장 */
-  const handleProfileSave = () => {
-    setSettings(prev => ({ ...prev, profile: { ...profileDraft } }));
-    showToast('프로필이 저장되었습니다.');
+  const handleProfileSave = async () => {
+    try {
+      await updateProfile({ name: profileDraft.nickname, profileImageUrl: profileImageUrl || null });
+      setSettings(prev => ({ ...prev, profile: { ...profileDraft } }));
+      setUser(prev => ({ ...prev, name: profileDraft.nickname, profileImageUrl }));
+      showToast('프로필이 저장되었습니다.');
+    } catch {
+      showToast('저장에 실패했습니다.', 'error');
+    }
   };
 
   /* 전체 저장 */
-  const handleSaveAll = () => {
-    setSettings(prev => ({ ...prev, profile: { ...profileDraft } }));
-    showToast('모든 설정이 저장되었습니다.');
+  const handleSaveAll = async () => {
+    try {
+      await updateProfile({ name: profileDraft.nickname, profileImageUrl: profileImageUrl || null });
+      setSettings(prev => ({ ...prev, profile: { ...profileDraft } }));
+      setUser(prev => ({ ...prev, name: profileDraft.nickname, profileImageUrl }));
+      showToast('모든 설정이 저장되었습니다.');
+    } catch {
+      showToast('저장에 실패했습니다.', 'error');
+    }
   };
 
   /* 초기화 */
@@ -226,11 +267,24 @@ const SettingsPage = () => {
           <div className="profile-edit-area">
             <div className="profile-avatar-edit">
               <img
-                src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+                src={resolveImageUrl(profileImageUrl)}
                 alt="profile"
                 className="profile-edit-img"
               />
-              <button className="avatar-change-btn">사진 변경</button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleAvatarChange}
+              />
+              <button
+                className="avatar-change-btn"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? '업로드 중…' : '사진 변경'}
+              </button>
             </div>
             <div className="profile-fields">
               <div className="field-group">
@@ -462,7 +516,7 @@ const SettingsPage = () => {
       </main>
 
       {/* ── 오른쪽 패널 ────────────────────────────── */}
-      <RightPanel settings={settings} />
+      <RightPanel settings={settings} profileImageUrl={profileImageUrl} />
     </div>
   );
 };
