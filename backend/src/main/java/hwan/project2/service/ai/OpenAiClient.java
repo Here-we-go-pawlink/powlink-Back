@@ -35,6 +35,12 @@ public class OpenAiClient {
     @Value("${openai.model.diary-generate}")
     private String diaryGenerateModel;
 
+    @Value("${openai.model.letter}")
+    private String letterModel;
+
+    @Value("${openai.model.report}")
+    private String reportModel;
+
     public OpenAiClient(@Value("${openai.base-url}") String baseUrl) {
         this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
@@ -47,6 +53,44 @@ public class OpenAiClient {
 
     public String generateDiary(List<Map<String, String>> messages) {
         return callCompletions(diaryGenerateModel, messages, true);
+    }
+
+    public String generateMonthlyInsight(String userContent) {
+        String systemPrompt = """
+                당신은 사용자의 한 달간 감정 일기를 분석하는 AI입니다.
+                제공된 월간 통계를 바탕으로 분석하고, 반드시 아래 JSON 형식으로만 반환하세요.
+                {
+                  "summary": "이번 달 총평 (2~3문장, 주요 감정과 패턴 위주)",
+                  "trend": "감정 변화 흐름 설명 (1~2문장)",
+                  "recommendations": ["실천 가능한 제안 1", "실천 가능한 제안 2", "실천 가능한 제안 3"]
+                }
+                """;
+        return callCompletions(reportModel, List.of(
+                Map.of("role", "system", "content", systemPrompt),
+                Map.of("role", "user", "content", userContent)
+        ), true);
+    }
+
+    public String generateWeeklyReport(String systemPrompt, String userContent) {
+        return callCompletions(reportModel, List.of(
+                Map.of("role", "system", "content", systemPrompt),
+                Map.of("role", "user", "content", userContent)
+        ), true);
+    }
+
+    public String summarizeConversation(String conversationText) {
+        return callCompletions(chatModel, List.of(
+                Map.of("role", "system", "content",
+                        "다음은 사용자와 AI 감정 일기 도우미의 대화입니다. 핵심 감정, 사건, 언급된 인물을 중심으로 2~3문장으로 요약해주세요."),
+                Map.of("role", "user", "content", conversationText)
+        ), false);
+    }
+
+    public String generateLetter(String systemPrompt, String userContent) {
+        return callCompletions(letterModel, List.of(
+                Map.of("role", "system", "content", systemPrompt),
+                Map.of("role", "user", "content", userContent)
+        ), false);
     }
 
     private String callCompletions(String model, List<Map<String, String>> messages, boolean jsonMode) {

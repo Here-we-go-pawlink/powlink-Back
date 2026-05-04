@@ -1,11 +1,15 @@
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { getUnreadCount } from '@/services/letterApi';
 import "@/styles/Sidebar-left/SidebarLeft.css";
 
 const menuItems = [
   { label: '홈',         icon: '🏠', route: '/home'      },
   { label: '일기 작성',   icon: '✏️', route: '/write'    },
   { label: '대화형 일기', icon: '🤖', route: '/ai-chat'  },
+  { label: 'AI 캐릭터',  icon: '🪄', route: '/character' },
+  { label: '편지함',     icon: '💌', route: '/letters'   },
   { label: '통계',       icon: '📊', route: '/stats'    },
   { label: 'EchoLens',  icon: '🌊', route: '/community' },
   { label: '설정',       icon: '⚙️', route: '/settings'  },
@@ -15,6 +19,13 @@ const SidebarLeft = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const user = useCurrentUser();
+  const [unreadLetters, setUnreadLetters] = useState(0);
+
+  useEffect(() => {
+    getUnreadCount()
+      .then(setUnreadLetters)
+      .catch(() => {});
+  }, [pathname]);
 
   const isActive = (route) => {
     if (!route) return false;
@@ -23,7 +34,7 @@ const SidebarLeft = () => {
   };
 
   const chatUsed      = user?.chatUsed  ?? 0;
-  const chatLimit     = user?.chatLimit ?? 10;
+  const chatLimit     = user?.chatLimit ?? 5;
   const chatRemaining = chatLimit - chatUsed;
   const chatWarning   = chatRemaining <= 3;
   const isPremium     = user?.plan === 'premium';
@@ -58,6 +69,9 @@ const SidebarLeft = () => {
               <span className={`chat-badge ${chatWarning ? 'warn' : ''}`}>
                 {chatUsed}/{chatLimit}
               </span>
+            )}
+            {item.route === '/letters' && unreadLetters > 0 && (
+              <span className="chat-badge warn">{unreadLetters}</span>
             )}
           </button>
         ))}

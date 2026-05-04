@@ -8,6 +8,7 @@ import hwan.project2.domain.diary.repo.DiaryRepository;
 import hwan.project2.service.ai.dto.AnalysisResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -27,6 +28,7 @@ public class DiaryAnalysisService {
     private final DiaryRepository diaryRepository;
     private final CharacterRepository characterRepository;
     private final OpenAiClient openAiClient;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final String SYSTEM_PROMPT_TEMPLATE = """
             당신은 사용자의 감정을 분석하는 AI 심리 분석 전문가입니다.
@@ -131,6 +133,7 @@ public class DiaryAnalysisService {
             AnalysisResult result = openAiClient.analyze(systemPrompt, userPrompt);
             diary.completeAnalysis(result);
             log.info("일기 분석 완료: diaryId={}", diaryId);
+            eventPublisher.publishEvent(new DiaryAnalysisCompletedEvent(diaryId, diary.getMember().getId()));
         } catch (Exception e) {
             log.error("일기 분석 실패: diaryId={}", diaryId, e);
             diary.failAnalysis();

@@ -10,6 +10,7 @@ public record DiaryListItemResponse(
         String title,
         LocalDate diaryDate,
         String weather,
+        String templateType,
         boolean isSecret,
         String status,
         LocalDateTime createdAt
@@ -20,6 +21,7 @@ public record DiaryListItemResponse(
                 diary.getTitle(),
                 diary.getDiaryDate(),
                 diary.getWeather() != null ? diary.getWeather().name() : null,
+                diary.getTemplateType() != null ? diary.getTemplateType().name() : "PLAIN",
                 diary.isSecret(),
                 diary.getStatus().name(),
                 diary.getCreatedAt()

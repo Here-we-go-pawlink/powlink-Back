@@ -2,7 +2,27 @@
   "permissions": {
     "allow": [
       "Bash(./gradlew bootRun)",
-      "Bash(./gradlew dependencies:*)"
+      "Bash(./gradlew dependencies:*)",
+      "Bash(kill %1)",
+      "Bash(./gradlew compileJava)",
+      "Bash(find /Users/gimhwanhui/IdeaProjects/emolens_back/frontend/src -type f \\\\\\(-name *.ts -o -name *.tsx -o -name *.js -o -name *.jsx \\\\\\))",
+      "Bash(grep -r \"template\\\\|Template\\\\|템플릿\" /Users/gimhwanhui/IdeaProjects/emolens_back/frontend/src --include=*.js --include=*.jsx -l)",
+      "Bash(./gradlew compileTestJava)",
+      "Bash(./gradlew test:*)",
+      "Bash(grep -r \"getStats\\\\|fetchStats\\\\|emotion.*data\\\\|stats.*endpoint\" /Users/gimhwanhui/IdeaProjects/emolens_back/frontend/src --include=*.js --include=*.jsx)",
+      "Bash(git -C /Users/gimhwanhui/IdeaProjects/emolens_back/frontend remote -v)",
+      "Bash(rm -rf /Users/gimhwanhui/IdeaProjects/emolens_back/frontend)",
+      "Bash(git clone:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(mysql --version)",
+      "Bash(brew services:*)",
+      "Bash(mysql:*)",
+      "Bash(node -e \"const bcrypt=require\\(''bcryptjs''\\); console.log\\(bcrypt.hashSync\\(''test1234'',10\\)\\);\")",
+      "Bash(xargs cat:*)",
+      "Bash(lsof -ti:8080)",
+      "Bash(xargs kill:*)",
+      "Bash(pkill -f \"bootRun\\\\|Project2Application\\\\|gradlew\")"
     ]
   }
 }

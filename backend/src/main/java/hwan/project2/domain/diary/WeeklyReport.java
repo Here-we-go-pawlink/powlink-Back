@@ -44,4 +44,25 @@ public class WeeklyReport {
     private boolean isActionCompleted; // 사용자가 추천 행동을 수행했는지 (피드백 루프용)
 
     private LocalDateTime createdAt; // 배치 작업이 실행되어 리포트가 생성된 시간
+
+    public static WeeklyReport create(Member member, LocalDate startDate, LocalDate endDate,
+                                      String weeklySummary, String dominantEmotion,
+                                      ActionType recommendedAction, String recommendationMessage,
+                                      String searchKeyword) {
+        WeeklyReport report = new WeeklyReport();
+        report.member = member;
+        report.startDate = startDate;
+        report.endDate = endDate;
+        report.weeklySummary = weeklySummary;
+        report.dominantEmotion = dominantEmotion;
+        report.recommendedAction = recommendedAction;
+        report.recommendationMessage = recommendationMessage;
+        report.searchKeyword = searchKeyword;
+        return report;
+    }
+
+    @PrePersist
+    private void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

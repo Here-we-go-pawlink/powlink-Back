@@ -33,6 +33,9 @@ public class Diary {
     @Enumerated(EnumType.STRING)
     private Weather weather;
 
+    @Enumerated(EnumType.STRING)
+    private TemplateType templateType;
+
     private boolean isSecret;
 
     @Column(columnDefinition = "TEXT")
@@ -68,22 +71,24 @@ public class Diary {
     private List<DiaryImage> images = new ArrayList<>();
 
     public static Diary create(Member member, String title, String content,
-                               LocalDate diaryDate, Weather weather, boolean isSecret) {
+                               LocalDate diaryDate, Weather weather, TemplateType templateType, boolean isSecret) {
         Diary diary = new Diary();
         diary.member = member;
         diary.title = title;
         diary.content = content;
         diary.diaryDate = diaryDate;
         diary.weather = weather;
+        diary.templateType = templateType != null ? templateType : TemplateType.PLAIN;
         diary.isSecret = isSecret;
         diary.status = AnalysisStatus.PENDING;
         return diary;
     }
 
-    public void update(String title, String content, Weather weather, boolean isSecret) {
+    public void update(String title, String content, Weather weather, TemplateType templateType, boolean isSecret) {
         this.title = title;
         this.content = content;
         this.weather = weather;
+        this.templateType = templateType != null ? templateType : TemplateType.PLAIN;
         this.isSecret = isSecret;
     }
 

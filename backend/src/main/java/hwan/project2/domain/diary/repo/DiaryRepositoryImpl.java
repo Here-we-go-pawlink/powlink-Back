@@ -7,6 +7,7 @@ import hwan.project2.domain.diary.QDiary;
 import hwan.project2.domain.diary.QDiaryEmotion;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -81,6 +82,36 @@ public class DiaryRepositoryImpl implements DiaryRepositoryCustom {
                         .and(diary.createdAt.before(threshold)))
                 .orderBy(diary.createdAt.asc())
                 .limit(limit)
+                .fetch();
+    }
+
+    @Override
+    public List<Diary> findCompletedByMemberAndDateRange(Long memberId, LocalDate startDate, LocalDate endDate) {
+        QDiary diary = QDiary.diary;
+        QDiaryEmotion emotion = QDiaryEmotion.diaryEmotion;
+
+        return queryFactory
+                .selectDistinct(diary)
+                .from(diary)
+                .leftJoin(diary.emotions, emotion).fetchJoin()
+                .where(diary.member.id.eq(memberId)
+                        .and(diary.status.eq(AnalysisStatus.COMPLETED))
+                        .and(diary.diaryDate.between(startDate, endDate)))
+                .orderBy(diary.diaryDate.asc())
+                .fetch();
+    }
+
+    @Override
+    public List<Long> findMemberIdsWithEnoughDiaries(LocalDate startDate, LocalDate endDate, int minCount) {
+        QDiary diary = QDiary.diary;
+
+        return queryFactory
+                .select(diary.member.id)
+                .from(diary)
+                .where(diary.status.eq(AnalysisStatus.COMPLETED)
+                        .and(diary.diaryDate.between(startDate, endDate)))
+                .groupBy(diary.member.id)
+                .having(diary.count().goe(minCount))
                 .fetch();
     }
 }

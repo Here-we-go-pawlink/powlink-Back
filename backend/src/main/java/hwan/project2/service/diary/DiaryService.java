@@ -11,6 +11,7 @@ import hwan.project2.web.dto.diary.DiaryCreateRequest;
 import hwan.project2.web.dto.diary.DiaryListItemResponse;
 import hwan.project2.web.dto.diary.DiaryResponse;
 import hwan.project2.web.dto.diary.DiaryUpdateRequest;
+import hwan.project2.service.stats.StatsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -29,18 +30,20 @@ public class DiaryService {
     private final DiaryRepository diaryRepository;
     private final MemberRepository memberRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final StatsService statsService;
 
     @Transactional
     public Long createDiary(Long memberId, DiaryCreateRequest req) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberNotFoundException::new);
         Diary diary = Diary.create(member, req.title(), req.content(),
-                req.diaryDate(), req.weather(), req.isSecret());
+                req.diaryDate(), req.weather(), req.templateType(), req.isSecret());
         if (req.imageUrls() != null && !req.imageUrls().isEmpty()) {
             diary.addImages(req.imageUrls());
         }
         Long diaryId = diaryRepository.save(diary).getId();
         eventPublisher.publishEvent(new DiaryCreatedEvent(diaryId)); // 커밋 후 AI 분석 트리거
+        statsService.evictCache(memberId);
         return diaryId;
     }
 
@@ -65,8 +68,9 @@ public class DiaryService {
     public void updateDiary(Long memberId, Long diaryId, DiaryUpdateRequest req) {
         Diary diary = diaryRepository.findByIdWithEmotions(diaryId, memberId)
                 .orElseThrow(DiaryNotFoundException::new);
-        diary.update(req.title(), req.content(), req.weather(), req.isSecret());
+        diary.update(req.title(), req.content(), req.weather(), req.templateType(), req.isSecret());
         diary.updateImages(req.imageUrls() != null ? req.imageUrls() : List.of());
+        statsService.evictCache(memberId);
     }
 
     @Transactional
@@ -74,5 +78,6 @@ public class DiaryService {
         Diary diary = diaryRepository.findByIdWithEmotions(diaryId, memberId)
                 .orElseThrow(DiaryNotFoundException::new);
         diaryRepository.delete(diary);
+        statsService.evictCache(memberId);
     }
 }

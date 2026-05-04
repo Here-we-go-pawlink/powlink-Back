@@ -54,7 +54,7 @@ class DiaryServiceImageTest {
                 "/images/diary/third.jpg"
         );
         DiaryCreateRequest req = new DiaryCreateRequest(
-                "오늘의 일기", "내용입니다", LocalDate.now(), null, false, imageUrls
+                "오늘의 일기", "내용입니다", LocalDate.now(), null, null, false, imageUrls
         );
 
         // when
@@ -74,7 +74,7 @@ class DiaryServiceImageTest {
     @DisplayName("이미지 없이 다이어리를 생성하면 이미지 목록은 비어있다")
     void createDiary_withoutImages_emptyImageList() {
         DiaryCreateRequest req = new DiaryCreateRequest(
-                "오늘의 일기", "내용입니다", LocalDate.now(), null, false, null
+                "오늘의 일기", "내용입니다", LocalDate.now(), null, null, false, null
         );
 
         Long diaryId = diaryService.createDiary(memberId, req);
@@ -88,13 +88,13 @@ class DiaryServiceImageTest {
     void updateDiary_replacesImageList() {
         // given: 이미지 2개로 생성
         Long diaryId = diaryService.createDiary(memberId, new DiaryCreateRequest(
-                "제목", "내용", LocalDate.now(), null, false,
+                "제목", "내용", LocalDate.now(), null, null, false,
                 List.of("/images/diary/old1.jpg", "/images/diary/old2.jpg")
         ));
 
         // when: 이미지 1개로 수정
         diaryService.updateDiary(memberId, diaryId, new DiaryUpdateRequest(
-                "수정된 제목", "수정된 내용", null, false,
+                "수정된 제목", "수정된 내용", null, null, false,
                 List.of("/images/diary/new1.jpg")
         ));
 
@@ -109,13 +109,13 @@ class DiaryServiceImageTest {
     void updateDiary_withNullImages_clearsImageList() {
         // given: 이미지 있는 다이어리
         Long diaryId = diaryService.createDiary(memberId, new DiaryCreateRequest(
-                "제목", "내용", LocalDate.now(), null, false,
+                "제목", "내용", LocalDate.now(), null, null, false,
                 List.of("/images/diary/photo.jpg")
         ));
 
         // when: imageUrls null로 수정
         diaryService.updateDiary(memberId, diaryId, new DiaryUpdateRequest(
-                "수정된 제목", "수정된 내용", null, false, null
+                "수정된 제목", "수정된 내용", null, null, false, null
         ));
 
         // then
@@ -128,7 +128,7 @@ class DiaryServiceImageTest {
     void deleteDiary_cascadesImagesToDelete() {
         // given
         Long diaryId = diaryService.createDiary(memberId, new DiaryCreateRequest(
-                "제목", "내용", LocalDate.now(), null, false,
+                "제목", "내용", LocalDate.now(), null, null, false,
                 List.of("/images/diary/photo.jpg")
         ));
 
