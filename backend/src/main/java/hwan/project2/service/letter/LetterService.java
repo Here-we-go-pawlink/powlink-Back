@@ -56,6 +56,24 @@ public class LetterService {
     }
 
     @Transactional
+    public void createImmediateLetter(Long diaryId, Long memberId) {
+        Diary diary = diaryRepository.findByIdWithEmotions(diaryId, memberId).orElse(null);
+        if (diary == null) {
+            log.warn("즉시 편지 생성 실패 - 일기를 찾을 수 없음: diaryId={}", diaryId);
+            return;
+        }
+        Character character = characterRepository.findByMemberId(memberId).orElse(null);
+        try {
+            String content = letterGenerationService.generate(diary, character);
+            Letter letter = Letter.ofDiaryReply(diary.getMember(), diary, content, LocalDateTime.now());
+            letterRepository.save(letter);
+            log.info("즉시 편지 생성 완료: diaryId={}", diaryId);
+        } catch (Exception e) {
+            log.error("즉시 편지 생성 중 오류 발생: diaryId={}", diaryId, e);
+        }
+    }
+
+    @Transactional
     public void createDiaryReplyLetter(Long diaryId, Long memberId) {
         Diary diary = diaryRepository.findByIdWithEmotions(diaryId, memberId).orElse(null);
         if (diary == null) {

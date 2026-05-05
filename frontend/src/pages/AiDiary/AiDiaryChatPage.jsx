@@ -70,7 +70,15 @@ const CATEGORY_SETS = {
   ],
 };
 
-const KEYWORDS = ['피곤함', '부담감', '답답함'];
+const EMOTION_KEYWORDS = ['피곤함', '부담감', '답답함', '불안함', '슬픔', '기쁨', '설렘', '화남', '외로움', '행복함'];
+
+function extractKeywords(messages) {
+  const userText = messages
+    .filter(m => m.role === 'user')
+    .map(m => m.text)
+    .join(' ');
+  return EMOTION_KEYWORDS.filter(k => userText.includes(k));
+}
 
 // ── 유틸 ──────────────────────────────────────────────────
 function getNow() {
@@ -488,9 +496,12 @@ export default function AiDiaryChatPage() {
         <div className="panel-card">
           <p className="panel-card-title">오늘의 감정 키워드</p>
           <div className="kw-row">
-            {KEYWORDS.map(k => (
-              <span key={k} className="kw-chip">{k}</span>
-            ))}
+            {extractKeywords(messages).length > 0
+              ? extractKeywords(messages).map(k => (
+                  <span key={k} className="kw-chip">{k}</span>
+                ))
+              : <p className="panel-card-body">대화를 나누면 감정 키워드가 나타나요.</p>
+            }
           </div>
         </div>
 
@@ -498,7 +509,10 @@ export default function AiDiaryChatPage() {
         <div className="panel-card">
           <p className="panel-card-title">대화 요약</p>
           <p className="panel-card-body">
-            오늘은 해야 할 일이 많아 부담을 느꼈고, 피로가 쌓여 있었음.
+            {messages.filter(m => m.role === 'user').length > 0
+              ? `${messages.filter(m => m.role === 'user').length}번 이야기했어요. 일기로 저장하면 AI가 감정을 분석해줘요.`
+              : 'AI와 대화를 나눠보세요.'
+            }
           </p>
         </div>
 
