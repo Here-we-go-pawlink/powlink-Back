@@ -22,19 +22,22 @@ public class MonthlyInsightScheduler {
     // 매월 1일 오전 9시 실행 (전달 분석)
     @Scheduled(cron = "0 0 9 1 * *")
     public void generateMonthlyInsights() {
-        YearMonth lastMonth = YearMonth.now().minusMonths(1);
-        LocalDate startDate = lastMonth.atDay(1);
-        LocalDate endDate = lastMonth.atEndOfMonth();
+        generateMonthlyInsightsFor(YearMonth.now().minusMonths(1));
+    }
 
-        log.info("월간 인사이트 생성 시작: {}", lastMonth);
+    public void generateMonthlyInsightsFor(YearMonth yearMonth) {
+        LocalDate startDate = yearMonth.atDay(1);
+        LocalDate endDate = yearMonth.atEndOfMonth();
+
+        log.info("월간 인사이트 생성 시작: {}", yearMonth);
 
         List<Long> memberIds = diaryRepository.findMemberIdsWithEnoughDiaries(startDate, endDate, 3);
         log.info("대상 멤버 수: {}", memberIds.size());
 
         for (Long memberId : memberIds) {
-            monthlyInsightGenerationService.generate(memberId, lastMonth);
+            monthlyInsightGenerationService.generate(memberId, yearMonth);
         }
 
-        log.info("월간 인사이트 생성 완료");
+        log.info("월간 인사이트 생성 완료: {}", yearMonth);
     }
 }

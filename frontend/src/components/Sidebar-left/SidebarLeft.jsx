@@ -9,30 +9,16 @@ const menuItems = [
   { label: '일기 작성',   icon: '✏️', route: '/write'    },
   { label: '대화형 일기', icon: '🤖', route: '/ai-chat'  },
   { label: 'AI 캐릭터',  icon: '🪄', route: '/character' },
-  { label: '편지함',     icon: '💌', route: '/letters'   },
+  { label: '편지함',     icon: '💌', route: '/letters'  },
   { label: '통계',       icon: '📊', route: '/stats'    },
   { label: 'EchoLens',  icon: '🌊', route: '/community' },
   { label: '설정',       icon: '⚙️', route: '/settings'  },
 ];
 
-const DEFAULT_PROFILE_IMAGE = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
-const resolveImageUrl = (url) => {
-  if (!url) return DEFAULT_PROFILE_IMAGE;
-  if (url.startsWith('http')) return url;
-  return `${import.meta.env.VITE_API_BASE_URL}${url}`;
-};
-
 const SidebarLeft = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const user = useCurrentUser();
-  const [unreadLetters, setUnreadLetters] = useState(0);
-
-  useEffect(() => {
-    getUnreadCount()
-      .then(setUnreadLetters)
-      .catch(() => {});
-  }, [pathname]);
 
   const isActive = (route) => {
     if (!route) return false;
@@ -40,8 +26,14 @@ const SidebarLeft = () => {
     return pathname.startsWith(route);
   };
 
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    getUnreadCount().then(setUnreadCount).catch(() => {});
+  }, [pathname]);
+
   const chatUsed      = user?.chatUsed  ?? 0;
-  const chatLimit     = user?.chatLimit ?? 5;
+  const chatLimit     = user?.chatLimit ?? 10;
   const chatRemaining = chatLimit - chatUsed;
   const chatWarning   = chatRemaining <= 3;
   const isPremium     = user?.plan === 'premium';
@@ -52,7 +44,13 @@ const SidebarLeft = () => {
         <div className="profile-img-wrap">
           <img
             className="profile-img"
-            src={resolveImageUrl(user?.profileImageUrl)}
+            src={
+              user?.profileImageUrl
+                ? user.profileImageUrl.startsWith('http')
+                  ? user.profileImageUrl
+                  : `${import.meta.env.VITE_API_BASE_URL}${user.profileImageUrl}`
+                : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
+            }
             alt="profile"
           />
         </div>
@@ -77,8 +75,8 @@ const SidebarLeft = () => {
                 {chatUsed}/{chatLimit}
               </span>
             )}
-            {item.route === '/letters' && unreadLetters > 0 && (
-              <span className="chat-badge warn">{unreadLetters}</span>
+            {item.route === '/letters' && unreadCount > 0 && (
+              <span className="chat-badge">{unreadCount}</span>
             )}
           </button>
         ))}

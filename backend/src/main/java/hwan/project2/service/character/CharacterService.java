@@ -5,6 +5,7 @@ import hwan.project2.domain.character.repo.CharacterRepository;
 import hwan.project2.domain.member.Member;
 import hwan.project2.domain.member.repo.MemberRepository;
 import hwan.project2.exception.auth.MemberNotFoundException;
+import hwan.project2.exception.character.CharacterNotFoundException;
 import hwan.project2.web.dto.character.CharacterRequest;
 import hwan.project2.web.dto.character.CharacterResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class CharacterService {
     public CharacterResponse getMyCharacter(Long memberId) {
         return characterRepository.findByMemberId(memberId)
                 .map(CharacterResponse::from)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "캐릭터가 아직 설정되지 않았습니다."));
+                .orElseThrow(CharacterNotFoundException::new);
     }
 
     @Transactional
@@ -42,7 +43,7 @@ public class CharacterService {
     @Transactional
     public CharacterResponse updateCharacter(Long memberId, CharacterRequest req) {
         Character character = characterRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "캐릭터가 아직 설정되지 않았습니다. POST로 먼저 생성하세요."));
+                .orElseThrow(CharacterNotFoundException::new);
         character.update(req.name(), req.tone(), req.personality(), req.musicGenre(), req.activityType());
         return CharacterResponse.from(character);
     }

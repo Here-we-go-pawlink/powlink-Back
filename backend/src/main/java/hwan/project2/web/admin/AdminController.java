@@ -39,9 +39,13 @@ public class AdminController {
 
     /** 월간 인사이트 스케줄러 수동 트리거 */
     @PostMapping("/monthly-insight/trigger")
-    public ResponseEntity<String> triggerMonthlyInsight() {
-        monthlyInsightScheduler.generateMonthlyInsights();
-        return ResponseEntity.ok("월간 인사이트 생성 완료");
+    public ResponseEntity<String> triggerMonthlyInsight(
+            @RequestParam(required = false) String yearMonth) {
+        java.time.YearMonth ym = yearMonth != null
+                ? java.time.YearMonth.parse(yearMonth)
+                : java.time.YearMonth.now().minusMonths(1);
+        monthlyInsightScheduler.generateMonthlyInsightsFor(ym);
+        return ResponseEntity.ok("월간 인사이트 생성 완료: " + ym);
     }
 
     /** 편지 즉시 생성 (테스트용) - AI 분석 완료된 일기 ID 필요 */

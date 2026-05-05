@@ -219,15 +219,9 @@ const SettingsPage = () => {
   };
 
   /* 전체 저장 */
-  const handleSaveAll = async () => {
-    try {
-      await updateProfile({ name: profileDraft.nickname, profileImageUrl: profileImageUrl || null });
-      setSettings(prev => ({ ...prev, profile: { ...profileDraft } }));
-      setUser(prev => ({ ...prev, name: profileDraft.nickname, profileImageUrl }));
-      showToast('모든 설정이 저장되었습니다.');
-    } catch {
-      showToast('저장에 실패했습니다.', 'error');
-    }
+  const handleSaveAll = () => {
+    setSettings(prev => ({ ...prev, profile: { ...profileDraft } }));
+    showToast('모든 설정이 저장되었습니다.');
   };
 
   /* 초기화 */
@@ -271,13 +265,6 @@ const SettingsPage = () => {
                 alt="profile"
                 className="profile-edit-img"
               />
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={handleAvatarChange}
-              />
               <button
                 className="avatar-change-btn"
                 onClick={() => fileInputRef.current?.click()}
@@ -285,6 +272,13 @@ const SettingsPage = () => {
               >
                 {uploading ? '업로드 중…' : '사진 변경'}
               </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleAvatarChange}
+              />
             </div>
             <div className="profile-fields">
               <div className="field-group">

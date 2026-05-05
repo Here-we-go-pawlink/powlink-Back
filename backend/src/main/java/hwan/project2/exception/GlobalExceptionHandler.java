@@ -4,6 +4,7 @@ import hwan.project2.exception.auth.InvalidCredentialsException;
 import hwan.project2.exception.auth.InvalidRefreshTokenException;
 import hwan.project2.exception.auth.MemberAlreadyExistsException;
 import hwan.project2.exception.auth.MemberNotFoundException;
+import hwan.project2.exception.character.CharacterNotFoundException;
 import hwan.project2.exception.diary.DiaryNotFoundException;
 import hwan.project2.exception.image.ImageUploadException;
 import hwan.project2.exception.letter.LetterNotFoundException;
@@ -34,6 +35,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> unauthorized(RuntimeException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(ErrorResponse.of("UNAUTHORIZED", "Unauthorized"));
+    }
+
+    @ExceptionHandler(CharacterNotFoundException.class)
+    public ResponseEntity<ErrorResponse> characterNotFound(CharacterNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponse.of("NOT_FOUND", e.getMessage()));
     }
 
     @ExceptionHandler(DiaryNotFoundException.class)
