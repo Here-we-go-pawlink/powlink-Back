@@ -1,0 +1,77 @@
+# Here_we_go
+
+로컬 개발 기준 워크플로는 `백엔드/프론트엔드 로컬 실행 + Redis만 Docker로 실행`입니다. 백엔드는 컨테이너에서 돌리지 않고, IDE 또는 Gradle로 직접 실행합니다.
+
+## 개발 환경
+
+- Java 21
+- Docker Desktop
+- Git
+
+## 환경 변수
+
+루트 디렉터리에서 `.env.example`을 복사해 `.env`를 만들고 값을 채웁니다.
+
+```powershell
+Copy-Item .env.example .env
+```
+
+필수 값:
+
+- `JWT_SECRET`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `KAKAO_CLIENT_ID`
+
+## 개발 워크플로
+
+1. 저장소를 클론합니다.
+2. Redis만 Docker로 실행합니다.
+3. 백엔드는 로컬에서 실행합니다.
+4. 프론트엔드도 로컬에서 실행합니다.
+
+### 1. Redis 실행
+
+프로젝트 루트에서 실행:
+
+```powershell
+docker compose up -d
+```
+
+Redis는 `localhost:6379` 에서 실행됩니다.
+
+### 2. 백엔드 로컬 실행
+
+```powershell
+cd backend
+.\gradlew.bat bootRun
+```
+
+macOS/Linux에서는:
+
+```bash
+cd backend
+./gradlew bootRun
+```
+
+백엔드는 `application.yml` 기준으로 Redis `localhost:6379`에 연결됩니다.
+
+### 3. 프론트엔드 로컬 실행
+
+프론트엔드 프로젝트에서 기존 방식대로 실행하면 됩니다.
+
+## 업데이트 반영
+
+```powershell
+git pull
+docker compose up -d
+cd backend
+.\gradlew.bat bootRun
+```
+
+## 정리
+
+- Docker: Redis만 제공
+- Backend: 로컬 실행
+- Frontend: 로컬 실행
+- GitHub: 계속 최신 코드 반영

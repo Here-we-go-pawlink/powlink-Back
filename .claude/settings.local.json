@@ -5,7 +5,28 @@
       "Bash(cmd.exe /c \"netstat -ano | findstr :8080\")",
       "Bash(cmd.exe:*)",
       "Bash(netstat -ano)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(Get-ChildItem -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(git clone *)",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(cat frontend/src/services/statsApi.js)",
+      "Bash(cat frontend/src/api/aiChat.js)",
+      "Bash(cat frontend/src/services/letterApi.js)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\ghks3\\\\IdeaProjects\\\\Here_we_go\\\\frontend\" -Directory)",
+      "Bash(git ls-remote *)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(git -C /c/Users/ghks3/IdeaProjects/Here_we_go/frontend remote -v)",
+      "Bash(git -C /c/Users/ghks3/IdeaProjects/Here_we_go/frontend log --oneline -3)",
+      "Bash(git -C /c/Users/ghks3/IdeaProjects/Here_we_go/frontend status)",
+      "Bash(git *)",
+      "Bash(Get-ChildItem *)",
+      "Bash(./gradlew compileJava)",
+      "Bash(Sort-Object)"
     ]
   }
 }

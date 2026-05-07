@@ -2,11 +2,16 @@ package hwan.project2.service.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hwan.project2.domain.character.Character;
+import hwan.project2.domain.character.repo.CharacterRepository;
 import hwan.project2.domain.member.Member;
 import hwan.project2.domain.member.repo.MemberRepository;
 import hwan.project2.service.diary.DiaryService;
+import hwan.project2.service.stats.StatsQueryService;
 import hwan.project2.web.dto.chat.ChatMessageDto;
 import hwan.project2.web.dto.diary.DiaryCreateRequest;
+import hwan.project2.web.dto.stats.StatsResponse.EmotionShare;
+import hwan.project2.web.dto.stats.StatsResponse.KeywordStat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +22,7 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,15 +33,6 @@ public class ChatService {
     private static final int COMPRESS_AFTER_TURNS = 4; // 4턴까지 전체, 5턴부터 오래된 메시지 압축
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String CHAT_SYSTEM_PROMPT = """
-            당신은 사용자의 하루를 함께 들어주는 따뜻한 AI 감정 일기 도우미입니다.
-            사용자가 오늘 있었던 일을 편하게 이야기할 수 있도록 공감하고,
-            짧은 질문으로 대화를 자연스럽게 이어가세요.
-            반드시 이전 대화에서 사용자가 말한 내용을 기억하고, 그 내용을 자연스럽게 연결해서 반응해주세요.
-            예를 들어 사용자가 앞서 언급한 사람, 사건, 감정을 다시 짚어주며 공감하세요.
-            답변은 2~3문장 이내로 간결하게 하고, 말투는 부드럽고 친근하게 해주세요.
-            대화가 8턴에 가까워지면 "이제 오늘의 이야기를 일기로 정리해볼까요?" 라고 자연스럽게 안내해주세요.
-            """;
 
     private static final String DIARY_GENERATE_SYSTEM_PROMPT = """
             다음은 사용자가 AI와 나눈 대화입니다.
@@ -48,6 +45,8 @@ public class ChatService {
     private final OpenAiClient openAiClient;
     private final DiaryService diaryService;
     private final MemberRepository memberRepository;
+    private final CharacterRepository characterRepository;
+    private final StatsQueryService statsQueryService;
 
     @Transactional
     public String reply(Long memberId, List<ChatMessageDto> messages) {
@@ -69,10 +68,22 @@ public class ChatService {
         }
 
         List<Map<String, String>> openAiMessages = new ArrayList<>();
-        openAiMessages.add(Map.of("role", "system", "content", CHAT_SYSTEM_PROMPT));
+        openAiMessages.add(Map.of("role", "system", "content", buildSystemPrompt(memberId)));
         openAiMessages.addAll(buildCompressedMessages(messages));
 
         return openAiClient.chat(openAiMessages);
+    }
+
+    private String buildSystemPrompt(Long memberId) {
+        return characterRepository.findByMemberId(memberId)
+                .map(c -> String.format(
+                        "당신은 사용자의 감정 일기 AI 친구입니다. 이름은 '%s'이고, 성격은 %s, 말투는 %s입니다. " +
+                        "사용자의 하루 이야기를 공감하며 들어주고, 감정을 자연스럽게 이끌어내세요. " +
+                        "대화는 짧고 따뜻하게 유지하며, 질문은 한 번에 하나만 하세요.",
+                        c.getName(), c.getPersonality().getDescription(), c.getTone().getDescription()))
+                .orElse("당신은 사용자의 감정 일기 AI 친구입니다. " +
+                        "사용자의 하루 이야기를 공감하며 들어주고, 감정을 자연스럽게 이끌어내세요. " +
+                        "대화는 짧고 따뜻하게 유지하며, 질문은 한 번에 하나만 하세요.");
     }
 
     private List<Map<String, String>> buildCompressedMessages(List<ChatMessageDto> messages) {
