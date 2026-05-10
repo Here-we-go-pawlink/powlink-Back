@@ -65,7 +65,7 @@ public class LetterService {
         Character character = characterRepository.findByMemberId(memberId).orElse(null);
         try {
             String content = letterGenerationService.generate(diary, character);
-            Letter letter = Letter.ofDiaryReply(diary.getMember(), diary, content, LocalDateTime.now());
+            Letter letter = Letter.ofDiaryReply(diary.getMember(), diary, content, LocalDate.now().plusDays(1).atTime(9, 0));
             letterRepository.save(letter);
             log.info("즉시 편지 생성 완료: diaryId={}", diaryId);
         } catch (Exception e) {

@@ -7,6 +7,7 @@ import hwan.project2.exception.auth.MemberNotFoundException;
 import hwan.project2.exception.character.CharacterNotFoundException;
 import hwan.project2.exception.diary.DiaryNotFoundException;
 import hwan.project2.exception.image.ImageUploadException;
+import hwan.project2.exception.community.PostNotFoundException;
 import hwan.project2.exception.letter.LetterNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(LetterNotFoundException.class)
     public ResponseEntity<ErrorResponse> letterNotFound(LetterNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponse.of("NOT_FOUND", e.getMessage()));
+    }
+
+    @ExceptionHandler(PostNotFoundException.class)
+    public ResponseEntity<ErrorResponse> postNotFound(PostNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ErrorResponse.of("NOT_FOUND", e.getMessage()));
     }
