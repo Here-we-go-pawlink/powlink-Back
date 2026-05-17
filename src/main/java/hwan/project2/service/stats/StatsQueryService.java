@@ -71,7 +71,7 @@ public class StatsQueryService {
                 .orderBy(diary.diaryDate.asc())
                 .fetch();
 
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("M/d");
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return rows.stream()
                 .map(t -> {
                     double raw = t.get(1, Double.class) != null ? t.get(1, Double.class) : 0.0;
