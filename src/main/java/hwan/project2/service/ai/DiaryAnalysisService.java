@@ -5,6 +5,7 @@ import hwan.project2.domain.character.repo.CharacterRepository;
 import hwan.project2.domain.diary.AnalysisStatus;
 import hwan.project2.domain.diary.Diary;
 import hwan.project2.domain.diary.repo.DiaryRepository;
+import hwan.project2.domain.member.Member;
 import hwan.project2.service.ai.dto.AnalysisResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -127,13 +128,19 @@ public class DiaryAnalysisService {
         diary.startAnalyzing();
 
         try {
-            Long memberId = diary.getMember().getId();
+            Member member = diary.getMember();
+            if (member == null) {
+                log.error("분석 대상 일기의 멤버를 찾을 수 없음: diaryId={}", diaryId);
+                diary.failAnalysis();
+                return;
+            }
+            Long memberId = member.getId();
             String systemPrompt = buildSystemPrompt(memberId);
             String userPrompt = buildUserPrompt(diary);
             AnalysisResult result = openAiClient.analyze(systemPrompt, userPrompt);
             diary.completeAnalysis(result);
             log.info("일기 분석 완료: diaryId={}", diaryId);
-            eventPublisher.publishEvent(new DiaryAnalysisCompletedEvent(diaryId, diary.getMember().getId()));
+            eventPublisher.publishEvent(new DiaryAnalysisCompletedEvent(diaryId, memberId));
         } catch (Exception e) {
             log.error("일기 분석 실패: diaryId={}", diaryId, e);
             diary.failAnalysis();

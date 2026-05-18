@@ -67,7 +67,7 @@ public class NotificationController {
      */
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(@RequestParam(required = false) String token) {
-        Long memberId = resolveMemeberId(token);
+        Long memberId = resolveMemberId(token);
         if (memberId == null) {
             // 인증 실패 → AUTH_ERROR 이벤트 전송 후 즉시 종료
             return closedEmitterWithError();
@@ -75,7 +75,7 @@ public class NotificationController {
         return sseEmitterService.subscribe(memberId);
     }
 
-    private Long resolveMemeberId(String token) {
+    private Long resolveMemberId(String token) {
         if (token == null || token.isBlank()) return null;
         try {
             Claims claims = jwtTokenProvider.parseAndValidate(token);

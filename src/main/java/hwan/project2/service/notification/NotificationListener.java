@@ -40,20 +40,6 @@ public class NotificationListener {
     @Async("analysisExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void onLetterCreated(LetterCreatedEvent event) {
-        // 편지 알림은 설정과 무관하게 항상 전송
-        notificationService.create(
-                event.memberId(),
-                NotificationType.LETTER,
-                "편지가 도착했어요 💌",
-                "AI 친구가 따뜻한 편지를 보냈어요",
-                "/letters"
-        );
-    }
-
-    @Async("analysisExecutor")
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onWeeklyReportCreated(WeeklyReportCreatedEvent event) {
         Member member = memberRepository.findById(event.memberId()).orElse(null);
         if (member == null || !member.isNotifyWeeklyReport()) return;

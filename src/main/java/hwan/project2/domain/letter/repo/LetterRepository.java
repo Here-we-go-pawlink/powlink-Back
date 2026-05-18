@@ -16,4 +16,10 @@ public interface LetterRepository extends JpaRepository<Letter, Long> {
     long countByMemberIdAndIsReadFalseAndDeliverAtLessThanEqual(Long memberId, LocalDateTime now);
 
     Optional<Letter> findByIdAndMemberId(Long id, Long memberId);
+
+    // 09:00 스케줄러용: 특정 시간대에 배달되는 편지 전체
+    List<Letter> findByDeliverAtBetween(LocalDateTime start, LocalDateTime end);
+
+    // dev용: 아직 배달되지 않은(미래 deliverAt) 편지
+    List<Letter> findByMemberIdAndDeliverAtAfter(Long memberId, LocalDateTime now);
 }

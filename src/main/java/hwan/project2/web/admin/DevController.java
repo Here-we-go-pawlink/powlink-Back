@@ -62,15 +62,10 @@ public class DevController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
 
-        if (startDate != null && endDate != null) {
-            LocalDate start = LocalDate.parse(startDate);
-            LocalDate end = LocalDate.parse(endDate);
-            weeklyReportGenerationService.generate(principal.getId(), start, end);
-            return ResponseEntity.ok("주간 리포트 생성 완료: " + start + " ~ " + end);
-        }
-
-        weeklyReportScheduler.generateWeeklyReports();
-        return ResponseEntity.ok("주간 리포트 생성 완료 (이번 주 전체 대상)");
+        LocalDate start = startDate != null ? LocalDate.parse(startDate) : LocalDate.now().minusDays(6);
+        LocalDate end   = endDate   != null ? LocalDate.parse(endDate)   : LocalDate.now();
+        weeklyReportGenerationService.generateForDev(principal.getId(), start, end);
+        return ResponseEntity.ok("주간 리포트 생성 완료: " + start + " ~ " + end);
     }
 
     /**
@@ -97,6 +92,17 @@ public class DevController {
     public ResponseEntity<String> triggerDailyReminder() {
         dailyReminderScheduler.sendDailyReminders();
         return ResponseEntity.ok("일기 작성 알림 발송 완료");
+    }
+
+    /**
+     * 현재 로그인 사용자의 미배달 편지를 즉시 배달 처리 + 알림 발송.
+     * 발표/테스트 시 편지가 하루 뒤 오는 것을 기다리지 않고 바로 확인 가능.
+     */
+    @PostMapping("/deliver-letters")
+    public ResponseEntity<String> deliverPendingLetters(
+            @AuthenticationPrincipal UserPrincipal principal) {
+        int count = dailyReminderScheduler.deliverPendingLettersForMember(principal.getId());
+        return ResponseEntity.ok("편지 " + count + "건 즉시 배달 완료");
     }
 
     private NotificationType parseType(String type) {

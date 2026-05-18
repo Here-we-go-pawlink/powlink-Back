@@ -22,10 +22,10 @@ public class SseEmitterService {
     public SseEmitter subscribe(Long memberId) {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
 
-        SseEmitter old = emitters.put(memberId, emitter);
-        if (old != null) {
-            old.complete();
-        }
+        emitters.compute(memberId, (k, old) -> {
+            if (old != null) old.complete();
+            return emitter;
+        });
 
         emitter.onCompletion(() -> emitters.remove(memberId, emitter));
         emitter.onTimeout(() -> emitters.remove(memberId, emitter));

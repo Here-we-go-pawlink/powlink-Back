@@ -71,4 +71,9 @@ public class Letter {
     public void markAsRead() {
         this.isRead = true;
     }
+
+    /** dev/테스트 전용: deliverAt을 지금으로 앞당겨 즉시 공개 */
+    public void deliverNow() {
+        this.deliverAt = LocalDateTime.now();
+    }
 }

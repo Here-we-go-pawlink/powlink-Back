@@ -62,7 +62,29 @@ public class WeeklyReportGenerationService {
             return;
         }
 
+        doGenerate(memberId, startDate, endDate, diaries);
+    }
+
+    /** dev/테스트 전용: 일기 1개만 있어도 생성, 기존 리포트 덮어씀 */
+    public void generateForDev(Long memberId, LocalDate startDate, LocalDate endDate) {
+        weeklyReportRepository.deleteByMemberIdAndStartDate(memberId, startDate);
+
+        List<Diary> diaries = diaryRepository.findCompletedByMemberAndDateRange(memberId, startDate, endDate);
+        if (diaries.isEmpty()) {
+            log.warn("주간 리포트 생성 불가 - 해당 기간 완료된 일기 없음: memberId={}", memberId);
+            return;
+        }
+
+        doGenerate(memberId, startDate, endDate, diaries);
+    }
+
+    private void doGenerate(Long memberId, LocalDate startDate, LocalDate endDate, List<Diary> diaries) {
+
         Member member = diaries.get(0).getMember();
+        if (member == null) {
+            log.error("주간 리포트 생성 실패 - 멤버를 찾을 수 없음: memberId={}", memberId);
+            return;
+        }
 
         try {
             String userContent = buildUserContent(diaries);

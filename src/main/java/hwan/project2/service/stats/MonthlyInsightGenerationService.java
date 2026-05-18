@@ -37,7 +37,10 @@ public class MonthlyInsightGenerationService {
         }
 
         Member member = memberRepository.findById(memberId).orElse(null);
-        if (member == null) return;
+        if (member == null) {
+            log.warn("월간 인사이트 생성 실패 - 멤버를 찾을 수 없음: memberId={}", memberId);
+            return;
+        }
 
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();

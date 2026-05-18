@@ -118,7 +118,13 @@ public class ChatService {
                    .append(": ").append(msg.text()).append("\n");
         }
 
-        String summary = openAiClient.summarizeConversation(oldConv.toString());
+        String summary;
+        try {
+            summary = openAiClient.summarizeConversation(oldConv.toString());
+        } catch (Exception e) {
+            log.warn("대화 요약 실패, 생략함: {}", e.getMessage());
+            summary = "이전 대화 내용을 참고해주세요.";
+        }
         result.add(Map.of("role", "system", "content", "[이전 대화 요약] " + summary));
 
         for (ChatMessageDto msg : recentMessages) {

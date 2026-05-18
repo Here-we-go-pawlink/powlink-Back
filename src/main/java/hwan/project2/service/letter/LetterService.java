@@ -6,13 +6,12 @@ import hwan.project2.domain.diary.Diary;
 import hwan.project2.domain.diary.repo.DiaryRepository;
 import hwan.project2.domain.letter.Letter;
 import hwan.project2.domain.letter.repo.LetterRepository;
+import hwan.project2.domain.member.Member;
 import hwan.project2.exception.letter.LetterNotFoundException;
-import hwan.project2.service.notification.LetterCreatedEvent;
 import hwan.project2.web.dto.letter.LetterListItemResponse;
 import hwan.project2.web.dto.letter.LetterResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +28,6 @@ public class LetterService {
     private final DiaryRepository diaryRepository;
     private final CharacterRepository characterRepository;
     private final LetterGenerationService letterGenerationService;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public List<LetterListItemResponse> getAvailableLetters(Long memberId) {
@@ -65,10 +63,15 @@ public class LetterService {
             log.warn("즉시 편지 생성 실패 - 일기를 찾을 수 없음: diaryId={}", diaryId);
             return;
         }
+        Member member = diary.getMember();
+        if (member == null) {
+            log.error("즉시 편지 생성 실패 - 멤버를 찾을 수 없음: diaryId={}", diaryId);
+            return;
+        }
         Character character = characterRepository.findByMemberId(memberId).orElse(null);
         try {
             String content = letterGenerationService.generate(diary, character);
-            Letter letter = Letter.ofDiaryReply(diary.getMember(), diary, content, LocalDate.now().plusDays(1).atTime(9, 0));
+            Letter letter = Letter.ofDiaryReply(member, diary, content, LocalDate.now().plusDays(1).atTime(9, 0));
             letterRepository.save(letter);
             log.info("즉시 편지 생성 완료: diaryId={}", diaryId);
         } catch (Exception e) {
@@ -83,16 +86,19 @@ public class LetterService {
             log.warn("편지 생성 실패 - 일기를 찾을 수 없음: diaryId={}", diaryId);
             return;
         }
-
+        Member member = diary.getMember();
+        if (member == null) {
+            log.error("편지 생성 실패 - 멤버를 찾을 수 없음: diaryId={}", diaryId);
+            return;
+        }
         Character character = characterRepository.findByMemberId(memberId).orElse(null);
 
         try {
             String content = letterGenerationService.generate(diary, character);
             LocalDateTime deliverAt = LocalDate.now().plusDays(1).atTime(9, 0);
-            Letter letter = Letter.ofDiaryReply(diary.getMember(), diary, content, deliverAt);
-            Letter saved = letterRepository.save(letter);
+            Letter letter = Letter.ofDiaryReply(member, diary, content, deliverAt);
+            letterRepository.save(letter);
             log.info("일기 답장 편지 생성 완료: diaryId={}, deliverAt={}", diaryId, deliverAt);
-            eventPublisher.publishEvent(new LetterCreatedEvent(saved.getId(), memberId));
         } catch (Exception e) {
             log.error("편지 생성 중 오류 발생: diaryId={}", diaryId, e);
         }
