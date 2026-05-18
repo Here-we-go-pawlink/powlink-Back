@@ -65,9 +65,8 @@ public class NotificationService {
 
     /** 알림 생성 후 SSE 푸시. 리스너/스케줄러에서 호출. */
     public void create(Long memberId, NotificationType type, String title, String body, String link) {
-        Member member = memberRepository.findById(memberId).orElse(null);
-        if (member == null) return;
-
+        // getReferenceById: FK 저장만 하므로 실제 SELECT 불필요
+        Member member = memberRepository.getReferenceById(memberId);
         Notification saved = notificationRepository.save(Notification.of(member, type, title, body, link));
         log.info("알림 생성: memberId={}, type={}", memberId, type);
 

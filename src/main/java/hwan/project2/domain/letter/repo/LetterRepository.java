@@ -11,8 +11,9 @@ import java.util.Optional;
 
 public interface LetterRepository extends JpaRepository<Letter, Long> {
 
-    // 배달 가능한 편지 목록 (deliverAt <= now), 최신순
-    List<Letter> findByMemberIdAndDeliverAtLessThanEqualOrderByDeliverAtDesc(Long memberId, LocalDateTime now);
+    // 배달 가능한 편지 목록 (deliverAt <= now), 최신순 — diary LEFT JOIN FETCH로 N+1 방지
+    @Query("SELECT l FROM Letter l LEFT JOIN FETCH l.diary WHERE l.member.id = :memberId AND l.deliverAt <= :now ORDER BY l.deliverAt DESC")
+    List<Letter> findByMemberIdAndDeliverAtLessThanEqualOrderByDeliverAtDesc(@Param("memberId") Long memberId, @Param("now") LocalDateTime now);
 
     // 읽지 않은 편지 수 (배달된 것만)
     long countByMemberIdAndIsReadFalseAndDeliverAtLessThanEqual(Long memberId, LocalDateTime now);

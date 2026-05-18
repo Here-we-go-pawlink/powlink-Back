@@ -39,12 +39,14 @@ public class StatsQueryService {
         return count != null ? count.intValue() : 0;
     }
 
-    /** 연속 기록 일수 (오늘부터 역순) */
+    /** 연속 기록 일수 (오늘부터 역순) — 최근 366일만 조회해 풀 스캔 방지 */
     public int computeStreak(Long memberId) {
+        LocalDate from = LocalDate.now().minusDays(365);
         List<LocalDate> dates = queryFactory
                 .selectDistinct(diary.diaryDate)
                 .from(diary)
-                .where(diary.member.id.eq(memberId))
+                .where(diary.member.id.eq(memberId)
+                        .and(diary.diaryDate.goe(from)))
                 .orderBy(diary.diaryDate.desc())
                 .fetch();
 
